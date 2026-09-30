@@ -44,7 +44,6 @@ window.onload = function () {
 };
 
 function carregarIndicadores() {
-    alert("SCRIPT NOVO");
 
     fetch("dados.xlsx")
 
@@ -152,11 +151,28 @@ dadosRit.forEach(linha => {
     .trim()
     .toUpperCase();
 
-const gestor =
-    nome
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toUpperCase();
+dadosRit.forEach(linha => {
+
+    const mesLinha = Number(linha["MÊS"]);
+
+    const vistoriador =
+        String(linha["VISTORIADOR"] || "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .trim()
+        .toUpperCase();
+
+    if (
+        gestoresPermitidos.includes(vistoriador) &&
+        (
+            mesSelecionado === 0 ||
+            mesLinha === mesSelecionado
+        )
+    ) {
+        totalRit++;
+    }
+
+});
 
     if (
         gestoresPermitidos.includes(vistoriador) &&
