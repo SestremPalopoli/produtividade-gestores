@@ -145,34 +145,11 @@ dadosRit.forEach(linha => {
     const mesLinha = Number(linha["MÊS"]);
 
     const vistoriador =
-    String(linha["VISTORIADOR"] || "")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .trim()
-    .toUpperCase();
-
-dadosRit.forEach(linha => {
-
-    const mesLinha = Number(linha["MÊS"]);
-
-    const vistoriador =
         String(linha["VISTORIADOR"] || "")
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "")
         .trim()
         .toUpperCase();
-
-    if (
-        gestoresPermitidos.includes(vistoriador) &&
-        (
-            mesSelecionado === 0 ||
-            mesLinha === mesSelecionado
-        )
-    ) {
-        totalRit++;
-    }
-
-});
 
     if (
         gestoresPermitidos.includes(vistoriador) &&
@@ -256,7 +233,6 @@ document.getElementById("checklist-total").innerHTML = totalCheck;
 const abaDeg = workbook.Sheets["DEG_ACUM"];
 const dadosDeg = XLSX.utils.sheet_to_json(abaDeg);
 
-console.log("DEG PRIMEIRA LINHA:", dadosDeg[0]);
 
 let totalDeg = 0;
 
@@ -485,12 +461,7 @@ if (valorData) {
         vistoriador.includes("PRISCILA")
     ) {
 
-        console.log({
-            gestor,
-            valorData,
-            dataExcel,
-            dataSelecionada
-        });
+        
 
     }
 
