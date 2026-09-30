@@ -145,9 +145,17 @@ dadosRit.forEach(linha => {
     const mesLinha = Number(linha["MÊS"]);
 
     const vistoriador =
-        String(linha["VISTORIADOR"] || "")
-        .trim()
-        .toUpperCase();
+    String(linha["VISTORIADOR"] || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .toUpperCase();
+
+const gestor =
+    nome
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toUpperCase();
 
     if (
         gestoresPermitidos.includes(vistoriador) &&
@@ -230,6 +238,8 @@ document.getElementById("checklist-total").innerHTML = totalCheck;
 
 const abaDeg = workbook.Sheets["DEG_ACUM"];
 const dadosDeg = XLSX.utils.sheet_to_json(abaDeg);
+
+console.log("DEG PRIMEIRA LINHA:", dadosDeg[0]);
 
 let totalDeg = 0;
 
@@ -435,19 +445,43 @@ function montarTabelaGestores(dados) {
 
                 const valorData = linha["DATA"];
 
-                if (valorData) {
+if (valorData) {
 
-                    const dataExcel =
-                        XLSX.SSF.format(
-                            "dd/mm/yyyy",
-                            valorData
-                        );
+    let dataExcel = "";
 
-                    if (dataExcel === dataSelecionada) {
-                        dia++;
-                    }
-                }
-            }
+    if (typeof valorData === "number") {
+
+        dataExcel = XLSX.SSF.format(
+            "dd/mm/yyyy",
+            valorData
+        );
+
+    } else {
+
+        dataExcel = String(valorData)
+            .trim();
+
+    }
+
+    if (
+        vistoriador.includes("ANDRE") ||
+        vistoriador.includes("PRISCILA")
+    ) {
+
+        console.log({
+            gestor,
+            valorData,
+            dataExcel,
+            dataSelecionada
+        });
+
+    }
+
+    if (dataExcel === dataSelecionada) {
+        dia++;
+    }
+
+}
 
         });
 
