@@ -44,6 +44,7 @@ window.onload = function () {
 };
 
 function carregarIndicadores() {
+    alert("SCRIPT NOVO");
 
     fetch("dados.xlsx")
 
