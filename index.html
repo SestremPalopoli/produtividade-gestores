@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Produtividade dos Gestores</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <header class="cabecalho">
+
+        <div class="logo">
+            <img src="logo-vivo.png" alt="Logo Vivo">
+        </div>
+
+        <div class="titulo">
+            <h1>Produtividade dos Gestores</h1>
+            <p>Acompanhamento Operacional</p>
+        </div>
+
+        <div class="data">
+            Atualizado em<br>
+            <span id="data-atualizacao">Carregando...</span>
+        </div>
+
+    </header>
+
+    <div class="filtros-container">
+
+        <div class="filtro-group">
+            <label>Selecione o mês</label>
+
+            <select id="mesSelecionado">
+                <option value="0">Todos</option>
+                <option value="1">Janeiro</option>
+                <option value="2">Fevereiro</option>
+                <option value="3">Março</option>
+                <option value="4">Abril</option>
+                <option value="5">Maio</option>
+                <option value="6">Junho</option>
+                <option value="7">Julho</option>
+                <option value="8">Agosto</option>
+                <option value="9" selected>Setembro</option>
+                <option value="10">Outubro</option>
+                <option value="11">Novembro</option>
+                <option value="12">Dezembro</option>
+            </select>
+        </div>
+
+        <div class="filtro-group">
+            <label>Selecione o indicador</label>
+
+            <select id="filtroIndicador">
+                <option>RIT</option>
+                <option>Falha de M.O</option>
+                <option>Checklist</option>
+                <option>Degradação Rede</option>
+                <option>Lançamento SD</option>
+                <option>Material Indevido</option>
+                <option>Clean-Up</option>
+            </select>
+        </div>
+        <div class="filtro-group">
+    <label>Selecione a data</label>
+
+    <select id="filtroData">
+    </select>
+</div>
+
+    </div>
+
+    <div class="cards">
+
+        <div class="card">
+            <h3>RIT</h3>
+            <p id="rit-total">0</p>
+        </div>
+
+        <div class="card">
+            <h3>Falha de M.O</h3>
+            <p id="fmo-total">0</p>
+        </div>
+
+        <div class="card">
+            <h3>Checklist</h3>
+            <p id="checklist-total">0</p>
+        </div>
+
+        <div class="card">
+            <h3>Degradação Rede</h3>
+            <p id="deg-total">0</p>
+        </div>
+
+        <div class="card">
+            <h3>Lançamento SD</h3>
+            <p id="sd-total">0</p>
+        </div>
+
+        <div class="card">
+            <h3>Material Indevido</h3>
+            <p id="fisc-total">0</p>
+        </div>
+
+        <div class="card">
+            <h3>Clean-Up</h3>
+            <p id="cleanup-total">0</p>
+        </div>
+
+    </div>
+
+    <div class="painel-tabela">
+
+        <h2 id="tituloTabela">
+            Performance RIT por Gestor
+        </h2>
+
+        <table id="tabela-rit">
+
+            <thead>
+                <tr>
+                    <th>Gestor</th>
+                    <th>Jul/26</th>
+                    <th>Ago/26</th>
+                    <th>Set/26</th>
+                </tr>
+            </thead>
+
+            <tbody></tbody>
+
+        </table>
+
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>

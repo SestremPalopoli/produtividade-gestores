@@ -1,0 +1,290 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    background:#F2F2F2;
+    font-family:'Segoe UI',sans-serif;
+}
+
+/* =========================
+   CABEÇALHO
+========================= */
+
+.cabecalho{
+    background:linear-gradient(
+        90deg,
+        #2E0A5E,
+        #5B1FA6,
+        #7A3FE0
+    );
+
+    color:white;
+
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    padding:15px 30px;
+}
+
+.logo{
+    width:180px;
+}
+
+.logo img{
+    width:200px;
+    height:auto;
+    display:block;
+}
+
+.titulo{
+    flex:1;
+    text-align:center;
+}
+
+.titulo h1{
+    font-size:52px;
+    font-weight:700;
+}
+
+.titulo p{
+    font-size:18px;
+    margin-top:5px;
+}
+
+.data{
+    width:220px;
+    text-align:right;
+    font-size:18px;
+    line-height:1.4;
+}
+
+/* =========================
+   FILTROS
+========================= */
+
+.filtros-container{
+
+    display:flex;
+    align-items:flex-end;
+    gap:20px;
+
+    flex-wrap:wrap;
+
+    margin:20px 25px;
+
+    padding:18px 25px;
+
+    background:#FFFFFF;
+
+    border-radius:20px;
+
+    box-shadow:0 4px 12px rgba(0,0,0,0.08);
+
+    width:max-content;
+}
+
+.filtro-group{
+    display:flex;
+    flex-direction:column;
+}
+
+.filtro-group label{
+
+    color:#5B1FA6;
+
+    font-size:12px;
+
+    font-weight:700;
+
+    text-transform:uppercase;
+
+    letter-spacing:1px;
+
+    margin-bottom:8px;
+}
+
+.filtro-group select{
+
+    width:230px;
+
+    height:42px;
+
+    border:2px solid #E5E5E5;
+
+    border-radius:12px;
+
+    background:#FFFFFF;
+
+    padding:0 14px;
+
+    font-size:15px;
+
+    font-weight:600;
+
+    color:#2E0A5E;
+
+    cursor:pointer;
+
+    transition:all 0.25s ease;
+}
+
+.filtro-group select:hover{
+    border-color:#7A3FE0;
+}
+
+.filtro-group select:focus{
+
+    outline:none;
+
+    border-color:#7A3FE0;
+
+    box-shadow:0 0 0 4px rgba(122,63,224,0.15);
+}
+
+/* =========================
+   CARDS
+========================= */
+
+.cards{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:15px;
+    padding:5px 10px 10px 10px;
+    flex-wrap:wrap;
+}
+
+.card{
+
+    width:160px;
+
+    height:150px;
+
+    background:white;
+
+    border-radius:35px;
+
+    text-align:center;
+
+    padding:15px;
+
+    box-shadow:0 4px 12px rgba(0,0,0,0.08);
+
+    transition:0.2s;
+}
+
+.card:hover{
+    transform:translateY(-3px);
+}
+
+.card h3{
+
+    color:#5B1FA6;
+
+    font-size:14px;
+
+    white-space:nowrap;
+
+    overflow:hidden;
+
+    text-overflow:ellipsis;
+
+    margin-bottom:25px;
+}
+
+.card p{
+
+    font-size:50px;
+
+    font-weight:bold;
+}
+
+/* =========================
+   TABELA
+========================= */
+
+.painel-tabela{
+    margin:30px 25px;
+    background:white;
+    padding:25px;
+    border-radius:20px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.08);
+
+    display:flex;
+    flex-direction:column;
+}
+
+.painel-tabela h2{
+    color:#5B1FA6;
+    margin-bottom:20px;
+}
+
+#tabela-rit{
+    width:100%;
+    border-collapse:collapse;
+    table-layout:fixed;
+}
+
+#tabela-rit th{
+    background:#5B1FA6;
+    color:white;
+    padding:12px;
+    text-align:center;
+}
+
+#tabela-rit td{
+    padding:10px;
+    border-bottom:1px solid #E5E5E5;
+}
+#tabela-rit th:first-child,
+#tabela-rit td:first-child{
+    width:700px;
+    text-align:left;
+    padding-left:15px;
+}
+
+#tabela-rit th:not(:first-child),
+#tabela-rit td:not(:first-child){
+    width:120px;
+    text-align:center;
+}
+
+#tabela-rit td:first-child{
+    font-weight:600;
+}
+
+.linha-total{
+    background:#F3ECFF;
+    font-weight:bold;
+    color:#5B1FA6;
+}
+
+/* =========================
+   RESPONSIVIDADE
+========================= */
+
+@media (max-width: 768px){
+
+    .cabecalho{
+        flex-direction:column;
+        gap:15px;
+        text-align:center;
+    }
+
+    .data{
+        width:auto;
+        text-align:center;
+    }
+
+    .filtros-container{
+        width:calc(100% - 50px);
+    }
+
+    .filtro-group select{
+        width:100%;
+    }
+}
