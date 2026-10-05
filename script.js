@@ -49,12 +49,22 @@ function carregarIndicadores() {
 
         .then(response => {
 
-            document.getElementById("data-atualizacao")
-                .innerHTML = new Date().toLocaleString("pt-BR");
+    const ultimaAtualizacao =
+        response.headers.get("Last-Modified");
 
-            return response.arrayBuffer();
+    if (ultimaAtualizacao) {
 
-        })
+        const dataArquivo =
+            new Date(ultimaAtualizacao);
+
+        document.getElementById("data-atualizacao")
+            .innerHTML =
+            dataArquivo.toLocaleString("pt-BR");
+    }
+
+    return response.arrayBuffer();
+
+})
 
         .then(data => {
 
@@ -124,6 +134,7 @@ switch(indicador){
         break;
 }
 
+
 document.getElementById("tituloTabela").innerHTML =
     tituloTabela;
 
@@ -133,7 +144,44 @@ const abaSelecionada =
 const dadosTabela =
     XLSX.utils.sheet_to_json(abaSelecionada);
 
-montarTabelaGestores(dadosTabela);
+const abaCalendario =
+    workbook.Sheets["CALENDÁRIO"];
+
+let meta = 0;
+
+switch (indicador) {
+
+    case "RIT":
+        meta = abaCalendario["I7"]?.v || 0;
+        break;
+
+    case "Checklist":
+        meta = abaCalendario["I8"]?.v || 0;
+        break;
+
+    case "Falha de M.O":
+        meta = abaCalendario["I9"]?.v || 0;
+        break;
+
+    case "Degradação Rede":
+        meta = abaCalendario["I10"]?.v || 0;
+        break;
+
+    case "Lançamento SD":
+        meta = abaCalendario["I11"]?.v || 0;
+        break;
+
+    case "Clean-Up":
+        meta = abaCalendario["I12"]?.v || 0;
+        break;
+
+    case "Material Indevido":
+        meta = abaCalendario["I7"]?.v || 0;
+        break;
+}
+
+
+montarTabelaGestores(dadosTabela, meta);
 
 const abaRit = workbook.Sheets["RIT_ACUM"];
 const dadosRit = XLSX.utils.sheet_to_json(abaRit);
@@ -369,7 +417,8 @@ document.getElementById("cleanup-total").innerHTML = totalCleanup;
         });
 
 }
-function montarTabelaGestores(dados) {
+
+function montarTabelaGestores(dados, meta) {
 
     const gestores = [
         "Afonso Henriques Miguel Moreira",
@@ -385,37 +434,41 @@ function montarTabelaGestores(dados) {
     ];
 
     const dataSelecionada =
-        document.getElementById("filtroData").value;
+    document.getElementById("filtroData").value;
 
-    const thead =
-        document.querySelector("#tabela-rit thead");
+const thead =
+    document.querySelector("#tabela-rit thead");
 
-    const tbody =
-        document.querySelector("#tabela-rit tbody");
+const tbody =
+    document.querySelector("#tabela-rit tbody");
 
-    thead.innerHTML = `
-        <tr>
-            <th>Gestor</th>
-            <th>Jul/26</th>
-            <th>Ago/26</th>
-            <th>Set/26</th>
-            <th>${dataSelecionada}</th>
-        </tr>
-    `;
+
+thead.innerHTML = `
+    <tr>
+        <th>Gestor</th>
+        <th>Ago/26</th>
+        <th>Set/26</th>
+        <th>Out/26</th>
+        <th>${dataSelecionada}</th>
+        <th class="meta">Meta</th>
+        <th>%</th>
+    </tr>
+`;
 
     tbody.innerHTML = "";
 
-    let totalJul = 0;
     let totalAgo = 0;
     let totalSet = 0;
+    let totalOut = 0;
     let totalDia = 0;
+    let totalMeta = 0;
 
     gestores.forEach(nome => {
 
-        let jul = 0;
         let ago = 0;
-        let set = 0;
-        let dia = 0;
+let set = 0;
+let out = 0;
+let dia = 0;
 
         dados.forEach(linha => {
 
@@ -432,71 +485,109 @@ function montarTabelaGestores(dados) {
 
             if (vistoriador === gestor) {
 
-                if (mes === 7) jul++;
                 if (mes === 8) ago++;
                 if (mes === 9) set++;
+                if (mes === 10) out++;
 
                 const valorData = linha["DATA"];
 
-if (valorData) {
+                if (valorData) {
 
-    let dataExcel = "";
+                    let dataExcel = "";
 
-    if (typeof valorData === "number") {
+                    if (typeof valorData === "number") {
 
-        dataExcel = XLSX.SSF.format(
-            "dd/mm/yyyy",
-            valorData
-        );
+                        dataExcel = XLSX.SSF.format(
+                            "dd/mm/yyyy",
+                            valorData
+                        );
 
-    } else {
+                    } else {
 
-        dataExcel = String(valorData)
-            .trim();
+                        dataExcel = String(valorData).trim();
 
-    }
+                    }
 
-    if (
-        vistoriador.includes("ANDRE") ||
-        vistoriador.includes("PRISCILA")
-    ) {
-
-        
-
-    }
-
-    if (dataExcel === dataSelecionada) {
-        dia++;
-    }
-
-}
-
+                    if (dataExcel === dataSelecionada) {
+                        dia++;
+                    }
+                }
+            }
         });
 
-        totalJul += jul;
         totalAgo += ago;
-        totalSet += set;
+totalSet += set;
+totalOut += out;
         totalDia += dia;
+        totalMeta += Number(meta);
+
+const percentual =
+    meta > 0
+        ? ((out / meta) * 100)
+        : 0;
+
+        let farol = "";
+
+if (percentual >= 100) {
+    farol = "🟢";
+}
+else if (percentual >= 75) {
+    farol = "🟡";
+}
+else {
+    farol = "🔴";
+}
 
         tbody.innerHTML += `
-            <tr>
-                <td>${nome}</td>
-                <td>${jul}</td>
-                <td>${ago}</td>
-                <td>${set}</td>
-                <td>${dia}</td>
-            </tr>
-        `;
-
+    <tr>
+        <td>${nome}</td>
+        <td>${ago}</td>
+<td>${set}</td>
+<td>${out}</td>
+        <td>${dia}</td>
+        <td class="meta">${meta}</td>
+<td>${farol} ${percentual.toFixed(1)}%</td>
+    </tr>
+`;
     });
+
+    const percentualTotal =
+    totalMeta > 0
+        ? ((totalOut / totalMeta) * 100).toFixed(1)
+        : 0;
+
+        let farolTotal = "";
+
+if (percentualTotal >= 100) {
+    farolTotal = "🟢";
+}
+else if (percentualTotal >= 75) {
+    farolTotal = "🟡";
+}
+else {
+    farolTotal = "🔴";
+}
 
     tbody.innerHTML += `
         <tr class="linha-total">
-            <td>TOTAL</td>
-            <td>${totalJul}</td>
-            <td>${totalAgo}</td>
-            <td>${totalSet}</td>
-            <td>${totalDia}</td>
-        </tr>
+    <td>TOTAL</td>
+    <td>${totalAgo}</td>
+<td>${totalSet}</td>
+<td>${totalOut}</td>
+    <td>${totalDia}</td>
+    <td class="meta">${Number(totalMeta.toFixed(1))}</td>
+    <td>${farolTotal} ${percentualTotal}%</td>
+</tr>
     `;
 }
+document
+    .getElementById("btnFullscreen")
+    .addEventListener("click", () => {
+
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen();
+        } else {
+            document.exitFullscreen();
+        }
+
+    });
