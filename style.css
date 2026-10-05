@@ -197,9 +197,7 @@ body{
 }
 
 .card p{
-
     font-size:50px;
-
     font-weight:bold;
 }
 
@@ -208,7 +206,10 @@ body{
 ========================= */
 
 .painel-tabela{
-    margin:30px 25px;
+    margin:30px auto;
+    width:97%;
+    max-width:1450px;
+
     background:white;
     padding:25px;
     border-radius:20px;
@@ -226,7 +227,6 @@ body{
 #tabela-rit{
     width:100%;
     border-collapse:collapse;
-    table-layout:fixed;
 }
 
 #tabela-rit th{
@@ -239,18 +239,22 @@ body{
 #tabela-rit td{
     padding:10px;
     border-bottom:1px solid #E5E5E5;
+    text-align:center;
 }
+
+#tabela-rit td:first-child{
+    text-align:left;
+}
+
 #tabela-rit th:first-child,
 #tabela-rit td:first-child{
-    width:700px;
-    text-align:left;
-    padding-left:15px;
+    width:auto;
+    min-width:450px;
 }
 
 #tabela-rit th:not(:first-child),
 #tabela-rit td:not(:first-child){
-    width:120px;
-    text-align:center;
+    width:110px;
 }
 
 #tabela-rit td:first-child{
@@ -287,4 +291,68 @@ body{
     .filtro-group select{
         width:100%;
     }
+}
+th.meta {
+    background: #8bd300;
+    color: #fff;
+}
+
+td.meta {
+    color: #6d00a8;
+    font-weight: 700;
+    text-align: center;
+}
+.verde {
+    color: #00a651;
+    font-weight: bold;
+}
+
+.amarelo {
+    color: #ffb300;
+    font-weight: bold;
+}
+
+.vermelho {
+    color: #e53935;
+    font-weight: bold;
+}
+
+.btn-filtro{
+    width:230px;
+    height:42px;
+
+    border:2px solid #E5E5E5;
+    border-radius:12px;
+
+    background:#FFFFFF;
+
+    padding:0 14px;
+
+    font-size:15px;
+    font-weight:600;
+
+    color:#2E0A5E;
+
+    cursor:pointer;
+
+    transition:all 0.25s ease;
+}
+
+.btn-filtro:hover{
+    border-color:#7A3FE0;
+}
+
+.btn-filtro:focus{
+    outline:none;
+    border-color:#7A3FE0;
+    box-shadow:0 0 0 4px rgba(122,63,224,0.15);
+}
+
+#tabela-rit tbody tr:nth-child(even){
+    background:#FAFAFA;
+}
+
+#tabela-rit tbody tr:hover{
+    background:#F3ECFF;
+    transition:0.2s;
 }
