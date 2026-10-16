@@ -131,6 +131,40 @@ function ocultarErro() {
     document.getElementById("mensagemErro").hidden = true;
 }
 
+function carregarFiltroGestores() {
+    const select = document.getElementById("filtroGestor");
+
+    select.innerHTML = '<option value="">Selecione...</option>';
+
+    GESTORES.forEach(gestor => {
+        const opcao = document.createElement("option");
+        opcao.value = gestor;
+        opcao.textContent = gestor;
+        select.appendChild(opcao);
+    });
+}
+
+function abrirPainelGestor() {
+    const selectGestor = document.getElementById("filtroGestor");
+    const gestor = selectGestor.value;
+
+    if (!gestor) {
+        return;
+    }
+
+    const mes = document.getElementById("mesSelecionado").value;
+    const data = document.getElementById("filtroData").value;
+    const parametros = new URLSearchParams({ gestor, mes, data });
+
+    window.open(
+        `gestor.html?${parametros.toString()}`,
+        "_blank",
+        "noopener,noreferrer"
+    );
+
+    selectGestor.value = "";
+}
+
 async function carregarArquivoExcel() {
     const resposta = await fetch("dados.xlsx", { cache: "no-store" });
 
@@ -394,6 +428,12 @@ async function iniciarPainel() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+    carregarFiltroGestores();
+
+    document
+        .getElementById("filtroGestor")
+        .addEventListener("change", abrirPainelGestor);
+
     document
         .getElementById("mesSelecionado")
         .addEventListener("change", atualizarPainel);
