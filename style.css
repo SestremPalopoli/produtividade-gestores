@@ -412,3 +412,186 @@ body {
         margin: 12px;
     }
 }
+
+
+/* =========================
+   PÁGINA INDIVIDUAL DO GESTOR
+========================= */
+.pagina-gestor {
+    min-width: 1050px;
+}
+
+.cabecalho-gestor .titulo h1 {
+    font-size: clamp(25px, 2vw, 38px);
+}
+
+.acoes-gestor {
+    width: 150px;
+    text-align: right;
+}
+
+.btn-voltar {
+    min-height: 38px;
+    padding: 0 15px;
+    color: #ffffff;
+    background: transparent;
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    border-radius: 9px;
+    font-size: 13px;
+    font-weight: 750;
+    cursor: pointer;
+}
+
+.btn-voltar:hover {
+    color: var(--roxo);
+    background: #ffffff;
+}
+
+.conteudo-gestor {
+    padding: 10px 14px 14px;
+}
+
+.resumo-periodo {
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+}
+
+.resumo-periodo > div {
+    min-width: 175px;
+    padding: 7px 14px;
+    text-align: center;
+    background: #ffffff;
+    border-radius: 13px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+}
+
+.resumo-periodo span {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--roxo);
+    font-size: 11px;
+    font-weight: 750;
+    text-transform: uppercase;
+}
+
+.resumo-periodo strong {
+    font-size: 15px;
+}
+
+.grade-gestor {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.card-gestor-indicador {
+    min-height: 190px;
+    overflow: hidden;
+    text-align: center;
+    background: #ffffff;
+    border-radius: 17px;
+    box-shadow: 0 4px 13px rgba(0, 0, 0, 0.1);
+}
+
+.card-gestor-indicador header {
+    padding: 9px 7px;
+    color: #ffffff;
+    background: linear-gradient(90deg, var(--roxo-escuro), var(--roxo-claro));
+}
+
+.card-gestor-indicador header h2 {
+    font-size: 15px;
+}
+
+.valor-principal {
+    margin: 12px 0 10px;
+    color: #111111;
+    font-size: 42px;
+    font-weight: 850;
+    line-height: 1;
+}
+
+.metricas-gestor {
+    padding: 0 12px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 7px;
+}
+
+.metricas-gestor div {
+    padding: 6px;
+    background: #f6f2fc;
+    border-radius: 10px;
+}
+
+.metricas-gestor span {
+    display: block;
+    margin-bottom: 3px;
+    color: #6e5b82;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.metricas-gestor strong {
+    color: var(--roxo);
+    font-size: 17px;
+}
+
+.desempenho-gestor {
+    margin: 9px 12px 12px;
+    padding: 7px;
+    background: #f8f8f8;
+    border-radius: 10px;
+    font-size: 17px;
+    font-weight: 850;
+}
+
+.card-gestor-reservado {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 25px;
+    color: #6f5d85;
+    border: 2px dashed #cdbfe3;
+    box-shadow: none;
+}
+
+.card-gestor-reservado h2 {
+    margin: 10px 0 5px;
+    color: var(--roxo);
+    font-size: 18px;
+}
+
+.card-gestor-reservado p {
+    font-size: 13px;
+}
+
+@media (max-width: 1100px) {
+    .pagina-gestor {
+        min-width: 720px;
+    }
+
+    .grade-gestor {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 740px) {
+    .pagina-gestor {
+        min-width: 0;
+    }
+
+    .acoes-gestor {
+        width: auto;
+    }
+
+    .resumo-periodo {
+        flex-direction: column;
+    }
+
+    .grade-gestor {
+        grid-template-columns: 1fr;
+    }
+}
