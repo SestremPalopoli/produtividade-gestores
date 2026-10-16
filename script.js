@@ -264,6 +264,10 @@ function criarPainel(indicador, dados, meta, mesSelecionado, dataSelecionada) {
         totalDiaGeral += resultado.totalDia;
         totalMeta += meta;
 
+        const metaExibida = indicador.nome === "Falha de M.O"
+            ? Math.round(meta)
+            : meta;
+
         linhas += `
             <tr>
                 <td class="nome-gestor" title="${escaparHtml(gestor)}">
@@ -271,7 +275,7 @@ function criarPainel(indicador, dados, meta, mesSelecionado, dataSelecionada) {
                 </td>
                 <td>${resultado.totalMes}</td>
                 <td>${resultado.totalDia}</td>
-                <td class="meta">${meta}</td>
+                <td class="meta">${metaExibida}</td>
                 <td class="${farol.classe}">${farol.simbolo} ${percentual.toFixed(1)}%</td>
             </tr>
         `;
@@ -282,6 +286,9 @@ function criarPainel(indicador, dados, meta, mesSelecionado, dataSelecionada) {
         : 0;
 
     const farolTotal = obterFarol(percentualTotal);
+    const totalMetaExibida = indicador.nome === "Falha de M.O"
+        ? Math.round(totalMeta)
+        : totalMeta;
     const tituloMes = mesSelecionado === 0 ? "Total" : nomeMesCurto(mesSelecionado);
 
     return `
@@ -309,7 +316,7 @@ function criarPainel(indicador, dados, meta, mesSelecionado, dataSelecionada) {
                             <td>TOTAL</td>
                             <td>${totalMesGeral}</td>
                             <td>${totalDiaGeral}</td>
-                            <td class="meta">${totalMeta}</td>
+                            <td class="meta">${totalMetaExibida}</td>
                             <td class="${farolTotal.classe}">${farolTotal.simbolo} ${percentualTotal.toFixed(1)}%</td>
                         </tr>
                     </tbody>
