@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indicadores do Gestor</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="pagina-gestor">
+    <header class="cabecalho cabecalho-gestor">
+        <div class="logo">
+            <img src="logo-vivo.png" alt="Logo Vivo">
+        </div>
+
+        <div class="titulo">
+            <h1 id="nomeGestor">Indicadores do Gestor</h1>
+            <p id="periodoGestor">Carregando período...</p>
+        </div>
+
+        <div class="acoes-gestor">
+            <button id="btnFechar" class="btn-voltar" type="button">Fechar aba</button>
+        </div>
+    </header>
+
+    <main class="conteudo-gestor">
+        <section class="resumo-periodo">
+            <div>
+                <span>Mês</span>
+                <strong id="mesResumo">-</strong>
+            </div>
+            <div>
+                <span>Data selecionada</span>
+                <strong id="dataResumo">-</strong>
+            </div>
+        </section>
+
+        <section id="gradeGestor" class="grade-gestor" aria-label="Indicadores individuais"></section>
+    </main>
+
+    <div id="mensagemErroGestor" class="mensagem-erro" hidden></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="gestor.js"></script>
+</body>
+</html>
