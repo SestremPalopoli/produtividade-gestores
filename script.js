@@ -9,15 +9,12 @@ const INDICADORES = [
 ];
 
 const GESTORES = [
-    "Afonso Henriques Miguel Moreira",
     "Alexandre Morais Medeiros Da Silva",
     "Andre Mendes De Sousa",
     "Carmine Avarese Filho",
     "Denis Reis",
     "Deyvison Bruno Cutrim Ferreira",
     "Diego Mendonca Santos",
-    "Humberto De Faria Costa",
-    "Nilton Campos De Barros",
     "Priscila De Melo Sevilha Zandeli"
 ];
 
@@ -41,6 +38,13 @@ function escaparHtml(texto) {
 }
 
 function abreviarNomeGestor(nome) {
+    if (
+        normalizarTexto(nome) ===
+        "DEYVISON BRUNO CUTRIM FERREIRA"
+    ) {
+        return "Bruno Cutrim";
+    }
+
     const partes = String(nome || "").trim().split(/\s+/);
 
     if (partes.length <= 3) {
@@ -134,6 +138,10 @@ function ocultarErro() {
 function carregarFiltroGestores() {
     const select = document.getElementById("filtroGestor");
 
+    if (!select) {
+        return;
+    }
+
     select.innerHTML = '<option value="">Selecione...</option>';
 
     GESTORES.forEach(gestor => {
@@ -194,6 +202,15 @@ function carregarFiltroDatas() {
         }
 
         XLSX.utils.sheet_to_json(aba).forEach(linha => {
+            const gestor = normalizarTexto(linha["VISTORIADOR"]);
+            const gestorPermitido = GESTORES.some(
+                nome => normalizarTexto(nome) === gestor
+            );
+
+            if (!gestorPermitido) {
+                return;
+            }
+
             const data = formatarDataExcel(linha["DATA"]);
 
             if (data) {
@@ -430,9 +447,11 @@ async function iniciarPainel() {
 document.addEventListener("DOMContentLoaded", () => {
     carregarFiltroGestores();
 
-    document
-        .getElementById("filtroGestor")
-        .addEventListener("change", abrirPainelGestor);
+    const filtroGestor = document.getElementById("filtroGestor");
+
+    if (filtroGestor) {
+        filtroGestor.addEventListener("change", abrirPainelGestor);
+    }
 
     document
         .getElementById("mesSelecionado")
