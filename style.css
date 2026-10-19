@@ -126,14 +126,14 @@ body {
 .cards {
     margin: 8px 16px 12px;
     display: grid;
-    grid-template-columns: repeat(7, minmax(0, 1fr));
+    grid-template-columns: repeat(8, minmax(0, 1fr));
     gap: 10px;
 }
 
 .card {
     min-width: 0;
     min-height: 82px;
-    padding: 10px 7px;
+    padding: 10px 5px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -145,10 +145,11 @@ body {
 }
 
 .card h3 {
+    width: 100%;
     max-width: 100%;
     overflow: hidden;
     color: var(--roxo);
-    font-size: clamp(10px, 0.68vw, 13px);
+    font-size: clamp(9px, 0.62vw, 12px);
     font-weight: 750;
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -156,7 +157,7 @@ body {
 
 .card p {
     color: #080808;
-    font-size: clamp(29px, 1.85vw, 38px);
+    font-size: clamp(27px, 1.65vw, 36px);
     font-weight: 800;
     line-height: 1;
 }
@@ -607,4 +608,62 @@ body {
     .grade-gestor {
         grid-template-columns: 1fr;
     }
+}
+
+
+/* Liberado Comercial: tres meses mais recentes e data selecionada */
+.tabela-liberado th:first-child,
+.tabela-liberado td:first-child {
+    width: 43%;
+}
+
+.tabela-liberado th:nth-child(2),
+.tabela-liberado td:nth-child(2),
+.tabela-liberado th:nth-child(3),
+.tabela-liberado td:nth-child(3),
+.tabela-liberado th:nth-child(4),
+.tabela-liberado td:nth-child(4) {
+    width: 12%;
+}
+
+.tabela-liberado th:nth-child(5),
+.tabela-liberado td:nth-child(5) {
+    width: 21%;
+}
+
+.card-liberado-gestor {
+    padding-bottom: 12px;
+}
+
+.meses-liberado-gestor {
+    margin: 20px 12px 12px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 7px;
+}
+
+.meses-liberado-gestor div,
+.data-liberado-gestor {
+    padding: 10px 6px;
+    background: #f6f2fc;
+    border-radius: 10px;
+}
+
+.meses-liberado-gestor span,
+.data-liberado-gestor span {
+    display: block;
+    margin-bottom: 4px;
+    color: #6e5b82;
+    font-size: 11px;
+    font-weight: 750;
+}
+
+.meses-liberado-gestor strong,
+.data-liberado-gestor strong {
+    color: var(--roxo);
+    font-size: 21px;
+}
+
+.data-liberado-gestor {
+    margin: 0 12px;
 }
