@@ -5,7 +5,8 @@ const INDICADORES = [
     { nome: "Degradação Rede", aba: "DEG_ACUM", celulaMeta: "I10" },
     { nome: "Lançamento SD", aba: "SD_ACUM", celulaMeta: "I11" },
     { nome: "Material Indevido", aba: "FISC_ACUM", celulaMeta: "I7" },
-    { nome: "Clean-Up", aba: "CLEAN-UP_ACUM", celulaMeta: "I12" }
+    { nome: "Clean-Up", aba: "CLEAN-UP_ACUM", celulaMeta: "I12" },
+    { nome: "Liberado Comercial", aba: "LIBERADO COMERCIAL", tipo: "tres-meses" }
 ];
 
 const GESTORES = [
@@ -123,6 +124,47 @@ function nomeMesCurto(numeroMes) {
     ];
 
     return nomes[numeroMes] || "Mês";
+}
+
+function obterChaveMesAno(linha, colunaData = "DATA", colunaMes = "MÊS") {
+    const dataFormatada = formatarDataExcel(linha[colunaData]);
+    const partes = dataFormatada.split("/").map(Number);
+
+    if (partes.length === 3 && partes.every(Number.isFinite)) {
+        return {
+            chave: partes[2] * 100 + partes[1],
+            mes: partes[1],
+            ano: partes[2]
+        };
+    }
+
+    const mes = Number(linha[colunaMes]) || obterMesLinha(linha);
+    const ano = new Date().getFullYear();
+
+    return mes >= 1 && mes <= 12
+        ? { chave: ano * 100 + mes, mes, ano }
+        : null;
+}
+
+function obterUltimosTresMeses(dados, colunaData = "DATA", colunaMes = "MÊS") {
+    const mesesEncontrados = new Map();
+
+    dados.forEach(linha => {
+        const periodo = obterChaveMesAno(linha, colunaData, colunaMes);
+
+        if (periodo) {
+            mesesEncontrados.set(periodo.chave, periodo);
+        }
+    });
+
+    return [...mesesEncontrados.values()]
+        .sort((a, b) => a.chave - b.chave)
+        .slice(-3);
+}
+
+function contarRegistroNoPeriodo(linha, periodo, colunaData = "DATA", colunaMes = "MÊS") {
+    const periodoLinha = obterChaveMesAno(linha, colunaData, colunaMes);
+    return Boolean(periodoLinha && periodoLinha.chave === periodo.chave);
 }
 
 function mostrarErro(mensagem) {
@@ -377,6 +419,89 @@ function criarPainel(indicador, dados, meta, mesSelecionado, dataSelecionada) {
     `;
 }
 
+function criarPainelLiberadoComercial(indicador, dados, dataSelecionada) {
+    const periodos = obterUltimosTresMeses(dados, "Data visita Gestor", "MÊS");
+    const periodosExibidos = [...periodos];
+
+    while (periodosExibidos.length < 3) {
+        periodosExibidos.unshift(null);
+    }
+
+    const totaisMeses = [0, 0, 0];
+    let totalDia = 0;
+    let linhas = "";
+
+    GESTORES.forEach(gestor => {
+        const gestorNormalizado = normalizarTexto(gestor);
+        const dadosGestor = dados.filter(
+            linha => normalizarTexto(linha["GESTOR"]) === gestorNormalizado
+        );
+
+        const valoresMeses = periodosExibidos.map((periodo, indice) => {
+            const total = periodo
+                ? dadosGestor.filter(linha => contarRegistroNoPeriodo(linha, periodo, "Data visita Gestor", "MÊS")).length
+                : 0;
+            totaisMeses[indice] += total;
+            return total;
+        });
+
+        const valorDia = dadosGestor.filter(
+            linha => dataSelecionada && formatarDataExcel(linha["Data visita Gestor"]) === dataSelecionada
+        ).length;
+        totalDia += valorDia;
+
+        linhas += `
+            <tr>
+                <td class="nome-gestor" title="${escaparHtml(gestor)}">
+                    ${escaparHtml(abreviarNomeGestor(gestor))}
+                </td>
+                <td>${valoresMeses[0]}</td>
+                <td>${valoresMeses[1]}</td>
+                <td>${valoresMeses[2]}</td>
+                <td>${valorDia}</td>
+            </tr>
+        `;
+    });
+
+    const titulosMeses = periodosExibidos.map(
+        periodo => periodo ? nomeMesCurto(periodo.mes) : "-"
+    );
+
+    return `
+        <article class="painel-indicador painel-liberado">
+            <header class="painel-indicador-cabecalho">
+                <h2>${escaparHtml(indicador.nome)}</h2>
+            </header>
+
+            <div class="tabela-scroll">
+                <table class="tabela-indicador tabela-liberado">
+                    <thead>
+                        <tr>
+                            <th>Gestor</th>
+                            <th>${titulosMeses[0]}</th>
+                            <th>${titulosMeses[1]}</th>
+                            <th>${titulosMeses[2]}</th>
+                            <th title="${escaparHtml(dataSelecionada || "Data não selecionada")}">
+                                ${dataSelecionada ? escaparHtml(dataSelecionada.substring(0, 5)) : "Dia"}
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${linhas}
+                        <tr class="linha-total">
+                            <td>TOTAL</td>
+                            <td>${totaisMeses[0]}</td>
+                            <td>${totaisMeses[1]}</td>
+                            <td>${totaisMeses[2]}</td>
+                            <td>${totalDia}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </article>
+    `;
+}
+
 function criarPainelReservado() {
     return `
         <article class="painel-indicador painel-reservado">
@@ -408,27 +533,53 @@ function atualizarPainel() {
 
     INDICADORES.forEach(indicador => {
         const dados = obterDadosIndicador(indicador);
-        const meta = obterMeta(indicador);
+        const colunaGestor = indicador.tipo === "tres-meses"
+            ? "GESTOR"
+            : "VISTORIADOR";
 
-        const totalCard = dados.filter(linha => {
-            const gestor = normalizarTexto(linha["VISTORIADOR"]);
-            const gestorPermitido = GESTORES.some(
-                nome => normalizarTexto(nome) === gestor
+        const dadosPermitidos = dados.filter(linha => {
+            const gestor = normalizarTexto(linha[colunaGestor]);
+            return GESTORES.some(nome => normalizarTexto(nome) === gestor);
+        });
+
+        if (indicador.tipo === "tres-meses") {
+            const periodos = obterUltimosTresMeses(
+                dadosPermitidos,
+                "Data visita Gestor",
+                "MÊS"
             );
+            const periodoMaisRecente = periodos.at(-1);
+            const totalCard = periodoMaisRecente
+                ? dadosPermitidos.filter(
+                    linha => contarRegistroNoPeriodo(
+                        linha,
+                        periodoMaisRecente,
+                        "Data visita Gestor",
+                        "MÊS"
+                    )
+                ).length
+                : 0;
 
-            return gestorPermitido &&
-                (mesSelecionado === 0 || obterMesLinha(linha) === mesSelecionado);
-        }).length;
+            cards.push(criarCard(indicador, totalCard));
+            paineis.push(
+                criarPainelLiberadoComercial(indicador, dadosPermitidos, dataSelecionada)
+            );
+            return;
+        }
+
+        const meta = obterMeta(indicador);
+        const totalCard = dadosPermitidos.filter(
+            linha => mesSelecionado === 0 || obterMesLinha(linha) === mesSelecionado
+        ).length;
 
         cards.push(criarCard(indicador, totalCard));
         paineis.push(
-            criarPainel(indicador, dados, meta, mesSelecionado, dataSelecionada)
+            criarPainel(indicador, dadosPermitidos, meta, mesSelecionado, dataSelecionada)
         );
     });
 
     document.getElementById("cardsIndicadores").innerHTML = cards.join("");
-    document.getElementById("gradePaineis").innerHTML =
-        paineis.join("") + criarPainelReservado();
+    document.getElementById("gradePaineis").innerHTML = paineis.join("");
 }
 
 async function iniciarPainel() {
