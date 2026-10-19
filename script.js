@@ -357,7 +357,7 @@ function criarPainel(indicador, dados, meta, mesSelecionado, dataSelecionada) {
         totalDiaGeral += resultado.totalDia;
         totalMeta += meta;
 
-        const metaExibida = indicador.nome === "Falha de M.O"
+        const metaExibida = ["Falha de M.O", "Clean-Up"].includes(indicador.nome)
             ? Math.round(meta)
             : meta;
 
@@ -379,7 +379,7 @@ function criarPainel(indicador, dados, meta, mesSelecionado, dataSelecionada) {
         : 0;
 
     const farolTotal = obterFarol(percentualTotal);
-    const totalMetaExibida = indicador.nome === "Falha de M.O"
+    const totalMetaExibida = ["Falha de M.O", "Clean-Up"].includes(indicador.nome)
         ? Math.round(totalMeta)
         : totalMeta;
     const tituloMes = mesSelecionado === 0 ? "Total" : nomeMesCurto(mesSelecionado);
