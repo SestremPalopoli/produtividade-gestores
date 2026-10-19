@@ -88,7 +88,9 @@ function contarGestor(dados, gestor, mes, data) {
 function criarCardGestor(indicador, resultado, meta) {
     const percentual = meta > 0 ? (resultado.totalMes / meta) * 100 : 0;
     const farol = obterFarol(percentual);
-    const metaExibida = indicador.nome === "Falha de M.O" ? Math.round(meta) : meta;
+    const metaExibida = ["Falha de M.O", "Clean-Up"].includes(indicador.nome)
+        ? Math.round(meta)
+        : meta;
     return `
         <article class="card-gestor-indicador">
             <header><h2>${escaparHtml(indicador.nome)}</h2></header>
