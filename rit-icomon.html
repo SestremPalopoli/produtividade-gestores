@@ -39,9 +39,8 @@
                 </select>
             </div>
 
-            <button id="btnExpandir" class="botao" type="button">
-                Recolher equipes
-            </button>
+            <button id="btnLimpar" class="botao botao-secundario" type="button">Limpar filtros</button>
+            <button id="btnExpandir" class="botao" type="button">Recolher equipes</button>
 
             <button id="btnFullscreen" class="botao" type="button">
                 Tela cheia
@@ -53,21 +52,16 @@
         </section>
 
         <section class="resumo" aria-label="Resumo do painel">
-            <article>
-                <span>Coordenadores</span>
-                <strong id="totalCoordenadores">0</strong>
-            </article>
-            <article>
-                <span>Supervisores</span>
-                <strong id="totalSupervisores">0</strong>
-            </article>
-            <article>
-                <span>RIT no período mais recente</span>
-                <strong id="totalPeriodoRecente">0</strong>
-            </article>
+            <article><span>Total do mês atual</span><strong id="totalMesAtual">0</strong><small id="variacaoMes">Sem comparação</small></article>
+            <article><span>Semana atual</span><strong id="totalSemanaAtual">0</strong><small id="variacaoSemana">Sem comparação</small></article>
+            <article><span>Último dia</span><strong id="totalPeriodoRecente">0</strong><small>Período destacado</small></article>
+            <article class="card-alerta"><span>Supervisores zerados</span><strong id="totalZerados">0</strong><small>Na semana atual</small></article>
         </section>
-
         <section class="painel-tabela">
+            <div class="cabecalho-tabela">
+                <div><h2>Estrutura e lançamentos</h2><p>Clique no coordenador para expandir ou recolher a equipe.</p></div>
+                
+            </div>
             <div class="tabela-scroll">
                 <table id="tabelaIcomon">
                     <thead></thead>
