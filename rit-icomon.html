@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lançamento de RIT - Icomon</title>
+    <link rel="stylesheet" href="rit-icomon.css">
+</head>
+<body>
+    <header class="cabecalho">
+        <div class="logo">
+            <img src="logo-vivo.png" alt="Logo Vivo">
+        </div>
+
+        <div class="titulo">
+            <h1>Lançamento de RIT - Icomon</h1>
+            <p>Acompanhamento por Coordenador e Supervisor</p>
+        </div>
+
+        <div class="atualizacao">
+            Atualizado em<br>
+            <strong id="dataAtualizacao">Carregando...</strong>
+        </div>
+    </header>
+
+    <main>
+        <section class="barra-controles" aria-label="Controles do painel">
+            <div class="campo-controle">
+                <label for="filtroCoordenador">Coordenador</label>
+                <select id="filtroCoordenador">
+                    <option value="">Todos</option>
+                </select>
+            </div>
+
+            <div class="campo-controle">
+                <label for="filtroSupervisor">Supervisor</label>
+                <select id="filtroSupervisor">
+                    <option value="">Todos</option>
+                </select>
+            </div>
+
+            <button id="btnExpandir" class="botao" type="button">
+                Recolher equipes
+            </button>
+
+            <button id="btnFullscreen" class="botao" type="button">
+                Tela cheia
+            </button>
+
+            <a href="index.html" class="botao botao-link">
+                Voltar ao painel principal
+            </a>
+        </section>
+
+        <section class="resumo" aria-label="Resumo do painel">
+            <article>
+                <span>Coordenadores</span>
+                <strong id="totalCoordenadores">0</strong>
+            </article>
+            <article>
+                <span>Supervisores</span>
+                <strong id="totalSupervisores">0</strong>
+            </article>
+            <article>
+                <span>RIT no período mais recente</span>
+                <strong id="totalPeriodoRecente">0</strong>
+            </article>
+        </section>
+
+        <section class="painel-tabela">
+            <div class="tabela-scroll">
+                <table id="tabelaIcomon">
+                    <thead></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <div id="mensagemErro" class="mensagem-erro" hidden></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="rit-icomon.js"></script>
+</body>
+</html>
