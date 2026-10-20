@@ -216,19 +216,21 @@ function agruparPorCoordenador(estrutura) {
     return [...grupos.values()];
 }
 
+function criarCelula(valor, classes = "") {
+    const classeZero = valor === 0 ? "valor-zero" : "";
+    return `<td class="${classes} ${classeZero}">${valor}</td>`;
+}
+
 function criarCelulas(supervisores, periodos) {
-    const meses = periodos.meses.map(
-        periodo => `<td>${contar(supervisores, "mes", periodo.chave)}</td>`
+    const meses = periodos.meses.map((periodo, indice) =>
+        criarCelula(contar(supervisores, "mes", periodo.chave), indice === 0 ? "periodo-separador" : "")
     ).join("");
-    const semanas = periodos.semanas.map(
-        periodo => `<td>${contar(supervisores, "semana", periodo.chave)}</td>`
+    const semanas = periodos.semanas.map((periodo, indice) =>
+        criarCelula(contar(supervisores, "semana", periodo.chave), indice === 0 ? "periodo-separador" : "")
     ).join("");
     const datas = periodos.datas.map((periodo, indice) =>
-        `<td class="${indice === periodos.datas.length - 1 ? "ultima-data" : ""}">
-            ${contar(supervisores, "data", periodo.chave)}
-        </td>`
+        criarCelula(contar(supervisores, "data", periodo.chave), indice === 0 ? "periodo-separador" : "")
     ).join("");
-
     return meses + semanas + datas;
 }
 
@@ -238,10 +240,8 @@ function montarCabecalho(periodos) {
         return [
             ...Array(vazios).fill({ titulo: "-" }),
             ...lista
-        ].map((periodo, indice, todos) =>
-            `<th class="${titulo === "data" && indice === todos.length - 1 ? "ultima-data" : ""}">
-                ${escaparHtml(periodo.titulo)}
-            </th>`
+        ].map(periodo =>
+            `<th>${escaparHtml(periodo.titulo)}</th>`
         ).join("");
     };
 
@@ -299,14 +299,26 @@ function montarTabela() {
         </tr>
     `;
 
-    document.getElementById("totalCoordenadores").textContent = grupos.length;
-    document.getElementById("totalSupervisores").textContent =
-        new Set(supervisoresVisiveis).size;
-
+    const mesAtual = periodos.meses.at(-1);
+    const mesAnterior = periodos.meses.at(-2);
+    const semanaAtual = periodos.semanas.at(-1);
+    const semanaAnterior = periodos.semanas.at(-2);
     const ultimoPeriodo = periodos.datas.at(-1);
+    const totalMes = mesAtual ? contar(supervisoresVisiveis, "mes", mesAtual.chave) : 0;
+    const totalMesAnterior = mesAnterior ? contar(supervisoresVisiveis, "mes", mesAnterior.chave) : 0;
+    const totalSemana = semanaAtual ? contar(supervisoresVisiveis, "semana", semanaAtual.chave) : 0;
+    const totalSemanaAnterior = semanaAnterior ? contar(supervisoresVisiveis, "semana", semanaAnterior.chave) : 0;
+    const zerados = semanaAtual
+        ? supervisoresVisiveis.filter(item => contar([item], "semana", semanaAtual.chave) === 0).length
+        : 0;
+    document.getElementById("totalMesAtual").textContent = totalMes;
+    document.getElementById("variacaoMes").textContent = calcularVariacao(totalMes, totalMesAnterior);
+    document.getElementById("totalSemanaAtual").textContent = totalSemana;
+    document.getElementById("variacaoSemana").textContent = calcularVariacao(totalSemana, totalSemanaAnterior);
     document.getElementById("totalPeriodoRecente").textContent = ultimoPeriodo
         ? contar(supervisoresVisiveis, "data", ultimoPeriodo.chave)
         : 0;
+    document.getElementById("totalZerados").textContent = zerados;
 
     document.querySelectorAll(".btn-grupo").forEach(botao => {
         botao.addEventListener("click", alternarGrupo);
@@ -322,6 +334,21 @@ function alternarGrupo(evento) {
 
     linhas.forEach(linha => linha.classList.toggle("oculta", ocultar));
     evento.currentTarget.textContent = ocultar ? "▶" : "▼";
+}
+
+function atualizarFiltroSupervisor() {
+    const coordenador = normalizarTexto(document.getElementById("filtroCoordenador").value);
+    const supervisores = new Map();
+    estruturaCompleta
+        .filter(item => !coordenador || item.coordenador === coordenador)
+        .forEach(item => supervisores.set(item.supervisor, item.supervisorOriginal));
+    preencherSelect("filtroSupervisor", supervisores);
+}
+
+function calcularVariacao(atual, anterior) {
+    if (!anterior) return "Sem base anterior";
+    const valor = ((atual - anterior) / anterior) * 100;
+    return `${valor >= 0 ? "+" : ""}${valor.toFixed(1).replace(".", ",")}% vs. período anterior`;
 }
 
 function carregarFiltros() {
@@ -386,8 +413,17 @@ async function iniciar() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    document.getElementById("filtroCoordenador").addEventListener("change", montarTabela);
+    document.getElementById("filtroCoordenador").addEventListener("change", () => {
+        atualizarFiltroSupervisor();
+        montarTabela();
+    });
     document.getElementById("filtroSupervisor").addEventListener("change", montarTabela);
+    document.getElementById("btnLimpar").addEventListener("click", () => {
+        document.getElementById("filtroCoordenador").value = "";
+        atualizarFiltroSupervisor();
+        document.getElementById("filtroSupervisor").value = "";
+        montarTabela();
+    });
 
     document.getElementById("btnExpandir").addEventListener("click", event => {
         equipesRecolhidas = !equipesRecolhidas;
