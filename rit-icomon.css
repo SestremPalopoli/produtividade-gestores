@@ -300,3 +300,277 @@ body {
         grid-template-columns: 1fr;
     }
 }
+
+/* Melhorias gerenciais */
+body { min-width: 0; background: #f5f3f6; }
+.cabecalho { min-height: 100px; padding: 16px 32px; }
+.titulo h1 { font-size: clamp(28px, 3vw, 40px); }
+.titulo p { font-size: 16px; }
+.barra-controles { margin: 20px; padding: 20px 24px; border-radius: 22px; gap: 12px; }
+.campo-controle { flex: 1 1 240px; }
+.campo-controle select, .botao { min-height: 48px; border-radius: 13px; font-size: 13px; }
+.botao-secundario { color: #64596c; background: #fafafa; }
+.resumo { margin: 0 20px 18px; grid-template-columns: repeat(4, minmax(170px, 1fr)); gap: 14px; }
+.resumo article { padding: 16px; text-align: left; border-left: 5px solid #7a3fe0; border-radius: 16px; }
+.resumo span { text-transform: uppercase; letter-spacing: .03em; }
+.resumo strong { font-size: 30px; }
+.resumo small { display: block; margin-top: 3px; color: #776d7d; }
+.resumo .card-alerta { border-left-color: #b54708; }
+.resumo .card-alerta strong { color: #b54708; }
+.painel-tabela { margin: 0 20px 20px; border-radius: 18px; }
+.cabecalho-tabela { display: flex; justify-content: space-between; align-items: end; padding: 16px 18px 12px; gap: 20px; }
+.cabecalho-tabela h2 { font-size: 20px; color: #2e0a5e; }
+.cabecalho-tabela p, .legenda { margin-top: 3px; color: #766b7d; font-size: 12px; }
+.legenda span { display: inline-block; width: 14px; height: 14px; margin: 0 5px 0 10px; border-radius: 4px; vertical-align: -2px; background: rgba(122,63,224,.10); }
+.legenda span:last-of-type { background: rgba(122,63,224,.38); }
+.tabela-scroll { max-height: calc(100vh - 360px); border-top: 1px solid #eee8f2; }
+#tabelaIcomon { min-width: 1180px; }
+#tabelaIcomon th, #tabelaIcomon td { height: 34px; padding: 6px 8px; border-right: 1px solid white; border-bottom: 1px solid white; }
+#tabelaIcomon .coluna-nome { width: 340px; }
+.valor-zero { color: #aaa1b1 !important; }
+.periodo-separador { border-left: 3px solid #c7b3df !important; }
+.estado-vazio { padding: 28px !important; text-align: center !important; color: #746a79 !important; background: #fff !important; }
+@media (max-width: 1000px) { .resumo { grid-template-columns: repeat(2, 1fr); } .cabecalho-tabela { align-items: flex-start; flex-direction: column; } }
+@media (max-width: 650px) { .resumo { grid-template-columns: 1fr; } .barra-controles, .painel-tabela, .resumo { margin-left: 10px; margin-right: 10px; } }
+
+/* Ajuste 01: controles em uma unica linha nas telas desktop */
+@media (min-width: 1200px) {
+    .barra-controles {
+        display: grid;
+        grid-template-columns:
+            minmax(260px, 2fr)
+            minmax(260px, 2fr)
+            minmax(150px, 1fr)
+            minmax(160px, 1fr)
+            minmax(145px, 1fr)
+            minmax(210px, 1.15fr);
+        align-items: end;
+        column-gap: 12px;
+        row-gap: 0;
+        flex-wrap: nowrap;
+    }
+
+    .barra-controles .campo-controle,
+    .barra-controles .botao {
+        width: 100%;
+        min-width: 0;
+        margin: 0;
+    }
+
+    .barra-controles .campo-controle select {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .barra-controles .botao,
+    .barra-controles .botao-link {
+        white-space: nowrap;
+    }
+}
+
+/* Em notebooks, mantem uma linha com controles mais compactos. */
+@media (min-width: 1200px) and (max-width: 1500px) {
+    .barra-controles {
+        grid-template-columns:
+            minmax(210px, 1.7fr)
+            minmax(210px, 1.7fr)
+            minmax(125px, 1fr)
+            minmax(140px, 1fr)
+            minmax(120px, .9fr)
+            minmax(175px, 1.2fr);
+        column-gap: 8px;
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+
+    .barra-controles .botao,
+    .barra-controles select {
+        padding-left: 10px;
+        padding-right: 10px;
+        font-size: 12px;
+    }
+}
+
+/* Ajustes 02 a 04: tabela compacta, clean e sem destaque da ultima data */
+.painel-tabela {
+    overflow: hidden;
+}
+
+.cabecalho-tabela {
+    padding: 10px 14px 8px;
+}
+
+.cabecalho-tabela h2 {
+    font-size: 17px;
+    line-height: 1.15;
+}
+
+.cabecalho-tabela p {
+    margin-top: 2px;
+    font-size: 11px;
+}
+
+.legenda {
+    display: none !important;
+}
+
+.tabela-scroll {
+    max-height: none;
+    overflow: visible;
+    border-top: 1px solid #ece7ef;
+}
+
+#tabelaIcomon {
+    width: 100%;
+    min-width: 0;
+    table-layout: fixed;
+    border-collapse: collapse;
+    font-size: 10px;
+}
+
+#tabelaIcomon .coluna-nome,
+#tabelaIcomon th:first-child,
+#tabelaIcomon td:first-child {
+    width: 27%;
+    min-width: 0;
+}
+
+#tabelaIcomon th:not(:first-child),
+#tabelaIcomon td:not(:first-child) {
+    width: auto;
+    min-width: 0;
+}
+
+#tabelaIcomon th,
+#tabelaIcomon td {
+    height: 24px;
+    padding: 3px 4px;
+    line-height: 1.05;
+    border-right: 1px solid #ece8ef;
+    border-bottom: 1px solid #ece8ef;
+    background: #ffffff;
+    color: #3d3150;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#tabelaIcomon thead th {
+    height: 27px;
+    padding: 4px 3px;
+    background: #f7f4fa;
+    color: #4f167f;
+    font-size: 9px;
+    font-weight: 800;
+}
+
+#tabelaIcomon tbody tr:nth-child(even):not(.linha-coordenador):not(.linha-total) td {
+    background: #faf9fb;
+}
+
+#tabelaIcomon tbody tr:hover:not(.linha-coordenador):not(.linha-total) td {
+    background: #f3eff7;
+}
+
+#tabelaIcomon .linha-coordenador td {
+    height: 26px;
+    background: #56118d;
+    color: #ffffff;
+    font-weight: 800;
+}
+
+#tabelaIcomon .linha-total td {
+    height: 26px;
+    background: #eee8f3;
+    color: #321051;
+    font-weight: 800;
+}
+
+#tabelaIcomon .ultima-data,
+#tabelaIcomon th.ultima-data,
+#tabelaIcomon td.ultima-data {
+    background: inherit !important;
+    color: inherit !important;
+    font-weight: inherit !important;
+}
+
+#tabelaIcomon .valor-zero {
+    color: #aaa4ae !important;
+    background: inherit !important;
+}
+
+#tabelaIcomon .periodo-separador {
+    border-left: 2px solid #bdb3c5 !important;
+}
+
+#tabelaIcomon .btn-grupo {
+    width: 18px;
+    height: 18px;
+    margin-right: 4px;
+    padding: 0;
+    font-size: 9px;
+}
+
+@media (max-width: 1450px) {
+    #tabelaIcomon {
+        font-size: 9px;
+    }
+
+    #tabelaIcomon .coluna-nome,
+    #tabelaIcomon th:first-child,
+    #tabelaIcomon td:first-child {
+        width: 24%;
+    }
+
+    #tabelaIcomon th,
+    #tabelaIcomon td {
+        height: 22px;
+        padding: 2px 3px;
+    }
+
+    #tabelaIcomon thead th {
+        font-size: 8px;
+    }
+}
+
+/* Ajuste 05: zeros numericos e preenchimento integral nas linhas de coordenador */
+#tabelaIcomon td.valor-zero {
+    color: #8d8792 !important;
+    background: inherit;
+}
+
+#tabelaIcomon tr.linha-coordenador,
+#tabelaIcomon tr.linha-coordenador td,
+#tabelaIcomon tr.linha-coordenador td.valor-zero {
+    background-color: #56118d !important;
+    color: #ffffff !important;
+    font-weight: 800;
+}
+
+#tabelaIcomon tr.linha-coordenador:hover td,
+#tabelaIcomon tr.linha-coordenador:hover td.valor-zero {
+    background-color: #56118d !important;
+    color: #ffffff !important;
+}
+
+#tabelaIcomon tr.linha-total td,
+#tabelaIcomon tr.linha-total td.valor-zero {
+    background-color: #eee8f3 !important;
+    color: #321051 !important;
+    font-weight: 800;
+}
+
+/* Ajuste 06: separadores de periodo somente em cinza */
+#tabelaIcomon th:nth-child(5),
+#tabelaIcomon td:nth-child(5),
+#tabelaIcomon th:nth-child(10),
+#tabelaIcomon td:nth-child(10),
+#tabelaIcomon .periodo-separador {
+    border-left: 2px solid #b8b3bd !important;
+    box-shadow: none !important;
+}
+
+#tabelaIcomon thead th:nth-child(5),
+#tabelaIcomon thead th:nth-child(10) {
+    box-shadow: none !important;
+}
