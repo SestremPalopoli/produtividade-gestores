@@ -19,6 +19,7 @@ const CONFIGURACAO = {
 let dadosRit = [];
 let estruturaCompleta = [];
 let equipesRecolhidas = false;
+let dataReferenciaChave = 0;
 
 function normalizarTexto(texto) {
     return String(texto || "")
@@ -130,12 +131,48 @@ function prepararEstrutura(linhas) {
     );
 }
 
+function dataLocalParaIso(data) {
+    const ano = data.getFullYear();
+    const mes = String(data.getMonth() + 1).padStart(2, "0");
+    const dia = String(data.getDate()).padStart(2, "0");
+    return `${ano}-${mes}-${dia}`;
+}
+
+function isoParaChave(valor) {
+    return Number(String(valor || "").replaceAll("-", "")) || 0;
+}
+
+function chaveParaData(chave) {
+    const texto = String(chave).padStart(8, "0");
+    return new Date(Number(texto.slice(0, 4)), Number(texto.slice(4, 6)) - 1, Number(texto.slice(6, 8)));
+}
+
+function chaveParaTitulo(chave) {
+    const data = chaveParaData(chave);
+    return `${String(data.getDate()).padStart(2, "0")}/${String(data.getMonth() + 1).padStart(2, "0")}/${data.getFullYear()}`;
+}
+
+function obterDmenosUm() {
+    const data = new Date();
+    data.setHours(0, 0, 0, 0);
+    data.setDate(data.getDate() - 1);
+    return data;
+}
+
+function configurarFiltroData() {
+    const input = document.getElementById("filtroData");
+    const dMenosUm = obterDmenosUm();
+    input.max = dataLocalParaIso(dMenosUm);
+    input.value = input.max;
+    dataReferenciaChave = isoParaChave(input.value);
+}
+
 function obterPeriodos() {
+    const limite = dataReferenciaChave || isoParaChave(dataLocalParaIso(obterDmenosUm()));
     const meses = new Map();
     const semanas = new Map();
-    const datas = new Map();
 
-    dadosRit.forEach(item => {
+    dadosRit.filter(item => item.dataChave && item.dataChave <= limite).forEach(item => {
         if (item.ano && item.mes) {
             meses.set(item.mesChave, {
                 chave: item.mesChave,
@@ -144,7 +181,6 @@ function obterPeriodos() {
                 titulo: `${nomeMesCurto(item.mes)}/${String(item.ano).slice(-2)}`
             });
         }
-
         if (item.ano && item.semana) {
             semanas.set(item.semanaChave, {
                 chave: item.semanaChave,
@@ -153,20 +189,21 @@ function obterPeriodos() {
                 titulo: `Sem. ${item.semana}`
             });
         }
-
-        if (item.dataChave) {
-            datas.set(item.dataChave, {
-                chave: item.dataChave,
-                data: item.dataFormatada,
-                titulo: item.dataFormatada
-            });
-        }
     });
+
+    const dataFinal = chaveParaData(limite);
+    const datas = [];
+    for (let deslocamento = 4; deslocamento >= 0; deslocamento--) {
+        const data = new Date(dataFinal);
+        data.setDate(data.getDate() - deslocamento);
+        const chave = Number(dataLocalParaIso(data).replaceAll("-", ""));
+        datas.push({ chave, data: chaveParaTitulo(chave), titulo: chaveParaTitulo(chave) });
+    }
 
     return {
         meses: [...meses.values()].sort((a, b) => a.chave - b.chave).slice(-3),
         semanas: [...semanas.values()].sort((a, b) => a.chave - b.chave).slice(-5),
-        datas: [...datas.values()].sort((a, b) => a.chave - b.chave).slice(-5)
+        datas
     };
 }
 
@@ -318,6 +355,9 @@ function montarTabela() {
     document.getElementById("totalPeriodoRecente").textContent = ultimoPeriodo
         ? contar(supervisoresVisiveis, "data", ultimoPeriodo.chave)
         : 0;
+    document.getElementById("dataPeriodoRecente").textContent = ultimoPeriodo
+        ? `Referência: ${ultimoPeriodo.titulo}`
+        : "Sem data";
     document.getElementById("totalZerados").textContent = zerados;
 
     document.querySelectorAll(".btn-grupo").forEach(botao => {
@@ -418,10 +458,15 @@ document.addEventListener("DOMContentLoaded", () => {
         montarTabela();
     });
     document.getElementById("filtroSupervisor").addEventListener("change", montarTabela);
+    document.getElementById("filtroData").addEventListener("change", event => {
+        dataReferenciaChave = isoParaChave(event.currentTarget.value);
+        montarTabela();
+    });
     document.getElementById("btnLimpar").addEventListener("click", () => {
         document.getElementById("filtroCoordenador").value = "";
         atualizarFiltroSupervisor();
         document.getElementById("filtroSupervisor").value = "";
+        configurarFiltroData();
         montarTabela();
     });
 
@@ -441,5 +486,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    configurarFiltroData();
     iniciar();
 });
