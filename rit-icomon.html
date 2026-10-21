@@ -39,6 +39,11 @@
                 </select>
             </div>
 
+            <div class="campo-controle campo-data">
+                <label for="filtroData">Data de referência</label>
+                <input id="filtroData" type="date" aria-label="Data final exibida no painel">
+            </div>
+
             <button id="btnLimpar" class="botao botao-secundario" type="button">Limpar filtros</button>
             <button id="btnExpandir" class="botao" type="button">Recolher equipes</button>
 
@@ -54,7 +59,7 @@
         <section class="resumo" aria-label="Resumo do painel">
             <article><span>Total do mês atual</span><strong id="totalMesAtual">0</strong><small id="variacaoMes">Sem comparação</small></article>
             <article><span>Semana atual</span><strong id="totalSemanaAtual">0</strong><small id="variacaoSemana">Sem comparação</small></article>
-            <article><span>Último dia</span><strong id="totalPeriodoRecente">0</strong><small>Período destacado</small></article>
+            <article><span>Último dia</span><strong id="totalPeriodoRecente">0</strong><small id="dataPeriodoRecente">D-1</small></article>
             <article class="card-alerta"><span>Supervisores zerados</span><strong id="totalZerados">0</strong><small>Na semana atual</small></article>
         </section>
         <section class="painel-tabela">
