@@ -9,6 +9,29 @@ const INDICADORES_GESTOR = [
     { nome: "Liberado Comercial", aba: "LIBERADO COMERCIAL", tipo: "tres-meses" }
 ];
 
+
+const METAS_DIARIAS_POR_INDICADOR = {
+    "RIT": 4,
+    "Checklist": 2,
+    "Falha de M.O": 0,
+    "Degradação Rede": 4,
+    "Lançamento SD": 2,
+    "Clean-Up": 0.5,
+    "Material Indevido": 4,
+    "Liberado Comercial": 0
+};
+
+const DESCONTOS_META_OUTUBRO = [
+    {
+        gestor: "Alexandre Morais Medeiros Da Silva",
+        datas: ["2026-10-01", "2026-10-02", "2026-10-05"]
+    },
+    {
+        gestor: "Diego Mendonca Santos",
+        datas: ["2026-10-19"]
+    }
+];
+
 function normalizarTexto(texto) {
     return String(texto || "").normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "").trim().toUpperCase();
@@ -83,6 +106,32 @@ function contarGestor(dados, gestor, mes, data) {
         if (data && formatarDataExcel(linha["DATA"]) === data) totalDia++;
     });
     return { totalMes, totalDia };
+}
+
+
+function ajustarMetaPorDiasEspecificos(indicador, gestor, metaAtual, mesSelecionado) {
+    const metaBase = Number(metaAtual) || 0;
+
+    if (mesSelecionado !== 10 || metaBase <= 0) {
+        return metaBase;
+    }
+
+    const metaDiaria = Number(METAS_DIARIAS_POR_INDICADOR[indicador.nome]) || 0;
+
+    if (metaDiaria <= 0) {
+        return metaBase;
+    }
+
+    const ajusteGestor = DESCONTOS_META_OUTUBRO.find(
+        item => normalizarTexto(item.gestor) === normalizarTexto(gestor)
+    );
+
+    if (!ajusteGestor) {
+        return metaBase;
+    }
+
+    const desconto = ajusteGestor.datas.length * metaDiaria;
+    return Math.max(0, metaBase - desconto);
 }
 
 function criarCardGestor(indicador, resultado, meta) {
@@ -163,8 +212,21 @@ async function carregarPainelGestor() {
             if (indicador.tipo === "tres-meses") {
                 return criarCardLiberadoGestor(indicador, dados, gestor, data);
             }
-            const meta = Number(calendario[indicador.celulaMeta]?.v || 0);
-            return criarCardGestor(indicador, contarGestor(dados, gestor, mes, data), meta);
+            const metaOriginal = Number(
+                calendario[indicador.celulaMeta]?.v || 0
+            );
+            const metaAjustada = ajustarMetaPorDiasEspecificos(
+                indicador,
+                gestor,
+                metaOriginal,
+                mes
+            );
+
+            return criarCardGestor(
+                indicador,
+                contarGestor(dados, gestor, mes, data),
+                metaAjustada
+            );
         });
         document.getElementById("gradeGestor").innerHTML = cards.join("");
     } catch (erro) {
