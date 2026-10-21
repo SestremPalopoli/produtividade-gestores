@@ -9,8 +9,10 @@ const INDICADORES_GESTOR = [
     { nome: "Liberado Comercial", aba: "LIBERADO COMERCIAL", tipo: "tres-meses" }
 ];
 
+let workbookGestor = null;
+let parametrosGestor = null;
 
-const METAS_DIARIAS_POR_INDICADOR = {
+const METAS_DIARIAS = {
     "RIT": 4,
     "Checklist": 2,
     "Falha de M.O": 0,
@@ -20,17 +22,6 @@ const METAS_DIARIAS_POR_INDICADOR = {
     "Material Indevido": 4,
     "Liberado Comercial": 0
 };
-
-const DESCONTOS_META_OUTUBRO = [
-    {
-        gestor: "Alexandre Morais Medeiros Da Silva",
-        datas: ["2026-10-01", "2026-10-02", "2026-10-05"]
-    },
-    {
-        gestor: "Diego Mendonca Santos",
-        datas: ["2026-10-19"]
-    }
-];
 
 function normalizarTexto(texto) {
     return String(texto || "").normalize("NFD")
@@ -108,47 +99,39 @@ function contarGestor(dados, gestor, mes, data) {
     return { totalMes, totalDia };
 }
 
+function criarCardGestor(indicador, resultado) {
+    const metaDiaria = Number(METAS_DIARIAS[indicador.nome]) || 0;
+    const possuiMetaDiaria = metaDiaria > 0;
+    const percentualDiario = possuiMetaDiaria
+        ? (resultado.totalDia / metaDiaria) * 100
+        : 0;
+    const farol = possuiMetaDiaria
+        ? obterFarol(percentualDiario)
+        : { simbolo: "", classe: "sem-meta-diaria" };
+    const metaDiariaExibida = metaDiaria.toLocaleString("pt-BR", {
+        maximumFractionDigits: 1
+    });
+    const desempenho = possuiMetaDiaria
+        ? `${farol.simbolo} ${percentualDiario.toFixed(1)}%`
+        : "Sem meta diária";
 
-function ajustarMetaPorDiasEspecificos(indicador, gestor, metaAtual, mesSelecionado) {
-    const metaBase = Number(metaAtual) || 0;
-
-    if (mesSelecionado !== 10 || metaBase <= 0) {
-        return metaBase;
-    }
-
-    const metaDiaria = Number(METAS_DIARIAS_POR_INDICADOR[indicador.nome]) || 0;
-
-    if (metaDiaria <= 0) {
-        return metaBase;
-    }
-
-    const ajusteGestor = DESCONTOS_META_OUTUBRO.find(
-        item => normalizarTexto(item.gestor) === normalizarTexto(gestor)
-    );
-
-    if (!ajusteGestor) {
-        return metaBase;
-    }
-
-    const desconto = ajusteGestor.datas.length * metaDiaria;
-    return Math.max(0, metaBase - desconto);
-}
-
-function criarCardGestor(indicador, resultado, meta) {
-    const percentual = meta > 0 ? (resultado.totalMes / meta) * 100 : 0;
-    const farol = obterFarol(percentual);
-    const metaExibida = ["Falha de M.O", "Clean-Up"].includes(indicador.nome)
-        ? Math.round(meta)
-        : meta;
     return `
         <article class="card-gestor-indicador">
             <header><h2>${escaparHtml(indicador.nome)}</h2></header>
-            <div class="valor-principal">${resultado.totalMes}</div>
+            <div class="valor-principal">${resultado.totalDia}</div>
             <div class="metricas-gestor">
-                <div><span>Na data</span><strong>${resultado.totalDia}</strong></div>
-                <div><span>Meta</span><strong>${metaExibida}</strong></div>
+                <div>
+                    <span>No mês</span>
+                    <strong>${resultado.totalMes}</strong>
+                </div>
+                <div>
+                    <span>Meta diária</span>
+                    <strong>${possuiMetaDiaria ? metaDiariaExibida : "-"}</strong>
+                </div>
             </div>
-            <div class="desempenho-gestor ${farol.classe}">${farol.simbolo} ${percentual.toFixed(1)}%</div>
+            <div class="desempenho-gestor ${farol.classe}">
+                ${desempenho}
+            </div>
         </article>`;
 }
 
@@ -183,6 +166,98 @@ function criarCardLiberadoGestor(indicador, dados, gestor, dataSelecionada) {
         </article>`;
 }
 
+function ordenarDatasDecrescente(datas) {
+    return [...datas].sort((a, b) => {
+        const [diaA, mesA, anoA] = a.split("/").map(Number);
+        const [diaB, mesB, anoB] = b.split("/").map(Number);
+        return new Date(anoB, mesB - 1, diaB) - new Date(anoA, mesA - 1, diaA);
+    });
+}
+
+function obterDatasDisponiveis(workbook, mesSelecionado) {
+    const datas = new Set();
+
+    INDICADORES_GESTOR.forEach(indicador => {
+        const aba = workbook.Sheets[indicador.aba];
+        if (!aba) return;
+
+        const colunaData = indicador.tipo === "tres-meses"
+            ? "Data visita Gestor"
+            : "DATA";
+
+        XLSX.utils.sheet_to_json(aba).forEach(linha => {
+            const dataFormatada = formatarDataExcel(linha[colunaData]);
+            if (!/^\d{2}\/\d{2}\/\d{4}$/.test(dataFormatada)) return;
+
+            const mesData = Number(dataFormatada.split("/")[1]);
+            if (mesSelecionado === 0 || mesData === mesSelecionado) {
+                datas.add(dataFormatada);
+            }
+        });
+    });
+
+    return ordenarDatasDecrescente(datas).slice(0, 30);
+}
+
+function preencherFiltroData(workbook, mesSelecionado, dataInicial) {
+    const select = document.getElementById("filtroDataGestor");
+    const datas = obterDatasDisponiveis(workbook, mesSelecionado);
+
+    select.innerHTML = "";
+
+    if (datas.length === 0) {
+        select.innerHTML = '<option value="">Sem datas disponíveis</option>';
+        select.disabled = true;
+        return "";
+    }
+
+    select.disabled = false;
+    datas.forEach(data => {
+        const option = document.createElement("option");
+        option.value = data;
+        option.textContent = data;
+        select.appendChild(option);
+    });
+
+    const dataSelecionada = datas.includes(dataInicial)
+        ? dataInicial
+        : datas[0];
+
+    select.value = dataSelecionada;
+    return dataSelecionada;
+}
+
+function atualizarPeriodoNoCabecalho() {
+    const { mes } = parametrosGestor;
+    const data = document.getElementById("filtroDataGestor").value;
+
+    document.getElementById("periodoGestor").textContent =
+        `Resultados individuais | ${nomeMes(mes)} | ${data || "sem data selecionada"}`;
+}
+
+function renderizarIndicadoresGestor() {
+    const { gestor, mes } = parametrosGestor;
+    const data = document.getElementById("filtroDataGestor").value;
+    const calendario = workbookGestor.Sheets["CALENDÁRIO"];
+
+    const cards = INDICADORES_GESTOR.map(indicador => {
+        const aba = workbookGestor.Sheets[indicador.aba];
+        const dados = aba ? XLSX.utils.sheet_to_json(aba) : [];
+
+        if (indicador.tipo === "tres-meses") {
+            return criarCardLiberadoGestor(indicador, dados, gestor, data);
+        }
+
+        return criarCardGestor(
+            indicador,
+            contarGestor(dados, gestor, mes, data)
+        );
+    });
+
+    document.getElementById("gradeGestor").innerHTML = cards.join("");
+    atualizarPeriodoNoCabecalho();
+}
+
 function mostrarErroGestor(mensagem) {
     const erro = document.getElementById("mensagemErroGestor");
     erro.hidden = false;
@@ -190,45 +265,33 @@ function mostrarErroGestor(mensagem) {
 }
 
 async function carregarPainelGestor() {
-    const { gestor, mes, data } = obterParametros();
-    if (!gestor) return mostrarErroGestor("Nenhum gestor foi informado.");
+    parametrosGestor = obterParametros();
+    const { gestor, mes, data } = parametrosGestor;
+
+    if (!gestor) {
+        mostrarErroGestor("Nenhum gestor foi informado.");
+        return;
+    }
 
     document.getElementById("nomeGestor").textContent = gestor;
     document.getElementById("mesResumo").textContent = nomeMes(mes);
-    document.getElementById("dataResumo").textContent = data || "Não selecionada";
-    document.getElementById("periodoGestor").textContent = `Resultados individuais | ${nomeMes(mes)} | ${data || "sem data selecionada"}`;
     document.title = `${gestor} | Indicadores`;
 
     try {
         const resposta = await fetch("dados.xlsx", { cache: "no-store" });
         if (!resposta.ok) throw new Error(`Erro ${resposta.status}.`);
-        const workbook = XLSX.read(await resposta.arrayBuffer(), { type: "array" });
-        const calendario = workbook.Sheets["CALENDÁRIO"];
-        if (!calendario) throw new Error('A aba "CALENDÁRIO" não foi encontrada.');
 
-        const cards = INDICADORES_GESTOR.map(indicador => {
-            const aba = workbook.Sheets[indicador.aba];
-            const dados = aba ? XLSX.utils.sheet_to_json(aba) : [];
-            if (indicador.tipo === "tres-meses") {
-                return criarCardLiberadoGestor(indicador, dados, gestor, data);
-            }
-            const metaOriginal = Number(
-                calendario[indicador.celulaMeta]?.v || 0
-            );
-            const metaAjustada = ajustarMetaPorDiasEspecificos(
-                indicador,
-                gestor,
-                metaOriginal,
-                mes
-            );
+        workbookGestor = XLSX.read(
+            await resposta.arrayBuffer(),
+            { type: "array" }
+        );
 
-            return criarCardGestor(
-                indicador,
-                contarGestor(dados, gestor, mes, data),
-                metaAjustada
-            );
-        });
-        document.getElementById("gradeGestor").innerHTML = cards.join("");
+        if (!workbookGestor.Sheets["CALENDÁRIO"]) {
+            throw new Error('A aba "CALENDÁRIO" não foi encontrada.');
+        }
+
+        preencherFiltroData(workbookGestor, mes, data);
+        renderizarIndicadoresGestor();
     } catch (erro) {
         console.error(erro);
         mostrarErroGestor("Não foi possível carregar os indicadores do gestor.");
@@ -236,6 +299,13 @@ async function carregarPainelGestor() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    document.getElementById("btnFechar").addEventListener("click", () => window.close());
+    document
+        .getElementById("btnFechar")
+        .addEventListener("click", () => window.close());
+
+    document
+        .getElementById("filtroDataGestor")
+        .addEventListener("change", renderizarIndicadoresGestor);
+
     carregarPainelGestor();
 });
