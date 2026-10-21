@@ -9,6 +9,14 @@ const INDICADORES = [
     { nome: "Liberado Comercial", aba: "LIBERADO COMERCIAL", tipo: "tres-meses" }
 ];
 
+const AJUSTES_META_PROGRESSIVA = [
+    { gestor: "Denis Reis", inicio: "2026-10-14", fim: "2026-10-23" },
+    { gestor: "Priscila De Melo Sevilha Zandeli", inicio: "2026-10-14", fim: "2026-10-23" }
+];
+
+// Inclua aqui outros feriados que nao entram na meta do painel.
+const FERIADOS_META = ["2026-10-12"];
+
 const GESTORES = [
     "Alexandre Morais Medeiros Da Silva",
     "Andre Mendes De Sousa",
@@ -103,6 +111,77 @@ function obterMesLinha(linha) {
     const partes = dataFormatada.split("/");
 
     return partes.length === 3 ? Number(partes[1]) : 0;
+}
+
+function criarDataLocal(valor) {
+    if (valor instanceof Date) {
+        return new Date(valor.getFullYear(), valor.getMonth(), valor.getDate());
+    }
+    const texto = String(valor || "").trim();
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(texto)) {
+        const [dia, mes, ano] = texto.split("/").map(Number);
+        return new Date(ano, mes - 1, dia);
+    }
+    if (/^\d{4}-\d{2}-\d{2}$/.test(texto)) {
+        const [ano, mes, dia] = texto.split("-").map(Number);
+        return new Date(ano, mes - 1, dia);
+    }
+    return null;
+}
+
+function formatarDataIso(data) {
+    return `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, "0")}-${String(data.getDate()).padStart(2, "0")}`;
+}
+
+function ehDiaUtilMeta(data) {
+    return data.getDay() !== 0 &&
+        data.getDay() !== 6 &&
+        !FERIADOS_META.includes(formatarDataIso(data));
+}
+
+function contarDiasUteisMeta(inicio, fim) {
+    if (!inicio || !fim || inicio > fim) return 0;
+    let total = 0;
+    const cursor = new Date(inicio);
+    while (cursor <= fim) {
+        if (ehDiaUtilMeta(cursor)) total++;
+        cursor.setDate(cursor.getDate() + 1);
+    }
+    return total;
+}
+
+function obterDataReferenciaMeta(dataSelecionada) {
+    const selecionada = criarDataLocal(dataSelecionada);
+    if (selecionada) return selecionada;
+    const dMenosUm = new Date();
+    dMenosUm.setHours(0, 0, 0, 0);
+    dMenosUm.setDate(dMenosUm.getDate() - 1);
+    return dMenosUm;
+}
+
+function ajustarMetaProgressiva(gestor, metaAtual, dataSelecionada) {
+    const metaOriginal = Number(metaAtual) || 0;
+    const afastamento = AJUSTES_META_PROGRESSIVA.find(
+        item => normalizarTexto(item.gestor) === normalizarTexto(gestor)
+    );
+    if (!afastamento || metaOriginal <= 0) return metaOriginal;
+
+    const referencia = obterDataReferenciaMeta(dataSelecionada);
+    const inicioAfastamento = criarDataLocal(afastamento.inicio);
+    const fimAfastamento = criarDataLocal(afastamento.fim);
+    if (!inicioAfastamento || !fimAfastamento || referencia < inicioAfastamento) {
+        return metaOriginal;
+    }
+
+    const inicioMes = new Date(referencia.getFullYear(), referencia.getMonth(), 1);
+    const diasUteisDecorridos = contarDiasUteisMeta(inicioMes, referencia);
+    const fimProgressivo = referencia < fimAfastamento ? referencia : fimAfastamento;
+    const diasAusencia = contarDiasUteisMeta(inicioAfastamento, fimProgressivo);
+    if (diasUteisDecorridos <= 0 || diasAusencia <= 0) return metaOriginal;
+
+    // A meta da planilha e acumulada ate a data do painel.
+    const metaDiaria = metaOriginal / diasUteisDecorridos;
+    return Math.max(0, Math.round(metaOriginal - (metaDiaria * diasAusencia)));
 }
 
 function obterFarol(percentual) {
@@ -350,16 +429,23 @@ function criarPainel(indicador, dados, meta, mesSelecionado, dataSelecionada) {
             dataSelecionada
         );
 
-        const percentual = meta > 0 ? (resultado.totalMes / meta) * 100 : 0;
+        const metaAjustada = ajustarMetaProgressiva(
+            gestor,
+            meta,
+            dataSelecionada
+        );
+        const percentual = metaAjustada > 0
+            ? (resultado.totalMes / metaAjustada) * 100
+            : 0;
         const farol = obterFarol(percentual);
 
         totalMesGeral += resultado.totalMes;
         totalDiaGeral += resultado.totalDia;
-        totalMeta += meta;
+        totalMeta += metaAjustada;
 
         const metaExibida = ["Falha de M.O", "Clean-Up"].includes(indicador.nome)
-            ? Math.round(meta)
-            : meta;
+            ? Math.round(metaAjustada)
+            : metaAjustada;
 
         linhas += `
             <tr>
