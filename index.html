@@ -19,6 +19,44 @@
             padding-top: 4px;
             padding-bottom: 4px;
         }
+
+        /* Botão de acesso ao painel Icomon */
+        .btn-painel-icomon {
+            width: 230px;
+            height: 42px;
+            padding: 0 14px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            background: linear-gradient(90deg, #5b1fa6, #7a3fe0);
+            border: 2px solid #5b1fa6;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 700;
+            text-align: center;
+            text-decoration: none;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .btn-painel-icomon:hover {
+            background: linear-gradient(90deg, #2e0a5e, #5b1fa6);
+            border-color: #2e0a5e;
+            transform: translateY(-1px);
+        }
+
+        .btn-painel-icomon:focus {
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(122, 63, 224, 0.18);
+        }
+
+        @media (max-width: 840px) {
+            .btn-painel-icomon {
+                width: 100%;
+            }
+        }
     </style>
 </head>
 <body>
@@ -73,15 +111,42 @@
 
             <div class="filtro-group">
                 <label for="btnFullscreen">Tela cheia</label>
-                <button id="btnFullscreen" class="btn-filtro" type="button" title="Alternar tela cheia">
+                <button
+                    id="btnFullscreen"
+                    class="btn-filtro"
+                    type="button"
+                    title="Alternar tela cheia"
+                >
                     🖥️
                 </button>
             </div>
+
+            <div class="filtro-group">
+                <label for="btnPainelIcomon">Painéis</label>
+                <a
+                    id="btnPainelIcomon"
+                    class="btn-painel-icomon"
+                    href="rit-icomon.html"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="Abrir o painel Lançamento de RIT - Icomon"
+                >
+                    Lançamento de RIT - Icomon
+                </a>
+            </div>
         </section>
 
-        <section id="cardsIndicadores" class="cards" aria-label="Totais dos indicadores"></section>
+        <section
+            id="cardsIndicadores"
+            class="cards"
+            aria-label="Totais dos indicadores"
+        ></section>
 
-        <section id="gradePaineis" class="grade-paineis" aria-label="Indicadores por gestor"></section>
+        <section
+            id="gradePaineis"
+            class="grade-paineis"
+            aria-label="Indicadores por gestor"
+        ></section>
     </main>
 
     <div id="mensagemErro" class="mensagem-erro" hidden></div>
