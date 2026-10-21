@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plano Preventivo</title>
+    <link rel="stylesheet" href="plano-preventivo.css">
+</head>
+<body>
+    <header class="cabecalho">
+        <div class="logo"><img src="logo-vivo.png" alt="Logo Vivo"></div>
+        <div class="titulo">
+            <h1>Plano Preventivo</h1>
+            <p>Acompanhamento de execução e backlog</p>
+        </div>
+        <div class="atualizacao">
+            Atualizado em<br><strong id="dataAtualizacao">Carregando...</strong>
+        </div>
+    </header>
+
+    <main>
+        <section class="controles">
+            <div class="campo">
+                <label for="filtroFrente">Frente</label>
+                <select id="filtroFrente"><option value="TODAS">Todas</option></select>
+            </div>
+            <div class="campo">
+                <label for="filtroMes">Mês de destaque</label>
+                <select id="filtroMes"></select>
+            </div>
+            <button id="btnTelaCheia" class="botao" type="button">Tela cheia</button>
+            <a class="botao botao-link" href="index.html">Voltar ao painel principal</a>
+        </section>
+
+        <section id="cardsFrentes" class="cards-frentes" aria-label="Resumo das frentes"></section>
+
+        <section class="grade-graficos">
+            <article class="painel painel-evolucao">
+                <header class="painel-titulo">
+                    <div>
+                        <span class="sobrelinha">Evolução</span>
+                        <h2 id="tituloEvolucao">Produção mensal</h2>
+                    </div>
+                </header>
+                <div class="grafico-container"><canvas id="graficoEvolucao"></canvas></div>
+            </article>
+
+            <article class="painel painel-backlog">
+                <header class="painel-titulo">
+                    <div>
+                        <span class="sobrelinha">Prioridades</span>
+                        <h2>Maiores backlogs</h2>
+                    </div>
+                </header>
+                <div class="grafico-container"><canvas id="graficoBacklog"></canvas></div>
+            </article>
+        </section>
+
+        <section class="painel painel-detalhes">
+            <header class="painel-titulo">
+                <div>
+                    <span class="sobrelinha">Detalhamento</span>
+                    <h2>Atividades por frente</h2>
+                </div>
+                <button id="btnAlternarDetalhes" class="botao-secundario" type="button">Recolher</button>
+            </header>
+            <div id="detalhesFrentes" class="detalhes-frentes"></div>
+        </section>
+    </main>
+
+    <div id="mensagemErro" class="mensagem-erro" hidden></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <script src="plano-preventivo.js"></script>
+</body>
+</html>
