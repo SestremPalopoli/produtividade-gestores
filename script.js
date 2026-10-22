@@ -17,29 +17,6 @@ const AJUSTES_META_PROGRESSIVA = [
 // Inclua aqui outros feriados que nao entram na meta do painel.
 const FERIADOS_META = ["2026-10-12"];
 
-
-const METAS_DIARIAS_POR_INDICADOR = {
-    "RIT": 4,
-    "Checklist": 2,
-    "Falha de M.O": 0,
-    "Degradação Rede": 4,
-    "Lançamento SD": 2,
-    "Clean-Up": 0.5,
-    "Material Indevido": 4,
-    "Liberado Comercial": 0
-};
-
-const DESCONTOS_META_OUTUBRO = [
-    {
-        gestor: "Alexandre Morais Medeiros Da Silva",
-        datas: ["2026-10-01", "2026-10-02", "2026-10-05"]
-    },
-    {
-        gestor: "Diego Mendonca Santos",
-        datas: ["2026-10-19"]
-    }
-];
-
 const GESTORES = [
     "Alexandre Morais Medeiros Da Silva",
     "Andre Mendes De Sousa",
@@ -70,33 +47,17 @@ function escaparHtml(texto) {
 }
 
 function abreviarNomeGestor(nome) {
-    if (
-        normalizarTexto(nome) ===
-        "DEYVISON BRUNO CUTRIM FERREIRA"
-    ) {
-        return "Bruno Cutrim";
-    }
+    const NOMES_EXIBICAO = {
+        "ALEXANDRE MORAIS MEDEIROS DA SILVA": "Alexandre Morais",
+        "ANDRE MENDES DE SOUSA": "André Mendes",
+        "CARMINE AVARESE FILHO": "Carmine Averese",
+        "DENIS REIS": "Denis Reis",
+        "DEYVISON BRUNO CUTRIM FERREIRA": "Bruno Cutrim",
+        "DIEGO MENDONCA SANTOS": "Diego Mendonça",
+        "PRISCILA DE MELO SEVILHA ZANDELI": "Priscila Zandeli"
+    };
 
-    const partes = String(nome || "").trim().split(/\s+/);
-
-    if (partes.length <= 3) {
-        return nome;
-    }
-
-    const conectores = new Set(["DA", "DE", "DO", "DAS", "DOS", "E"]);
-    const partesPrincipais = partes.filter(
-        parte => !conectores.has(normalizarTexto(parte))
-    );
-
-    const primeiroNome = partesPrincipais[0];
-    const ultimoNome = partesPrincipais[partesPrincipais.length - 1];
-    const inicialMeio = partesPrincipais.length > 2
-        ? `${partesPrincipais[1].charAt(0).toUpperCase()}.`
-        : "";
-
-    return [primeiroNome, inicialMeio, ultimoNome]
-        .filter(Boolean)
-        .join(" ");
+    return NOMES_EXIBICAO[normalizarTexto(nome)] || nome;
 }
 
 function formatarDataExcel(valor) {
@@ -205,34 +166,6 @@ function ajustarMetaProgressiva(gestor, metaAtual, dataSelecionada) {
     // A meta da planilha e acumulada ate a data do painel.
     const metaDiaria = metaOriginal / diasUteisDecorridos;
     return Math.max(0, Math.round(metaOriginal - (metaDiaria * diasAusencia)));
-}
-
-
-function ajustarMetaPorDiasEspecificos(indicador, gestor, metaAtual, mesSelecionado) {
-    const metaBase = Number(metaAtual) || 0;
-
-    if (mesSelecionado !== 10 || metaBase <= 0) {
-        return metaBase;
-    }
-
-    const metaDiaria = Number(METAS_DIARIAS_POR_INDICADOR[indicador.nome]) || 0;
-
-    if (metaDiaria <= 0) {
-        return metaBase;
-    }
-
-    const ajusteGestor = DESCONTOS_META_OUTUBRO.find(
-        item => normalizarTexto(item.gestor) === normalizarTexto(gestor)
-    );
-
-    if (!ajusteGestor) {
-        return metaBase;
-    }
-
-    const quantidadeDias = ajusteGestor.datas.length;
-    const desconto = quantidadeDias * metaDiaria;
-
-    return Math.max(0, metaBase - desconto);
 }
 
 function obterFarol(percentual) {
@@ -480,16 +413,10 @@ function criarPainel(indicador, dados, meta, mesSelecionado, dataSelecionada) {
             dataSelecionada
         );
 
-        const metaProgressiva = ajustarMetaProgressiva(
+        const metaAjustada = ajustarMetaProgressiva(
             gestor,
             meta,
             dataSelecionada
-        );
-        const metaAjustada = ajustarMetaPorDiasEspecificos(
-            indicador,
-            gestor,
-            metaProgressiva,
-            mesSelecionado
         );
         const percentual = metaAjustada > 0
             ? (resultado.totalMes / metaAjustada) * 100
