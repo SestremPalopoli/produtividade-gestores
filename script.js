@@ -355,14 +355,72 @@ function obterDadosIndicador(indicador) {
     return XLSX.utils.sheet_to_json(aba);
 }
 
-function obterMeta(indicador) {
+function obterDiasUteisAcumulados(mesSelecionado, dataSelecionada) {
     const calendario = workbookGlobal.Sheets["CALENDÁRIO"];
+    if (!calendario || !mesSelecionado) return 0;
 
-    if (!calendario) {
-        return 0;
+    const linhas = XLSX.utils.sheet_to_json(calendario, {
+        header: 1,
+        defval: "",
+        raw: true
+    });
+    const dataLimite = criarDataLocal(dataSelecionada);
+    let maiorAcumulado = 0;
+
+    linhas.slice(1).forEach(linha => {
+        const dataLinha = criarDataLocal(formatarDataExcel(linha[0]));
+        const mesLinha = Number(linha[3]);
+        const acumulado = Number(linha[4]);
+
+        if (!dataLinha || mesLinha !== Number(mesSelecionado)) return;
+        if (dataLimite && dataLinha > dataLimite) return;
+        if (Number.isFinite(acumulado)) {
+            maiorAcumulado = Math.max(maiorAcumulado, acumulado);
+        }
+    });
+
+    return maiorAcumulado;
+}
+
+function obterMetaDia(indicador) {
+    const calendario = workbookGlobal.Sheets["CALENDÁRIO"];
+    if (!calendario) return 0;
+
+    const linhas = XLSX.utils.sheet_to_json(calendario, {
+        header: 1,
+        defval: "",
+        raw: true
+    });
+    const aliases = {
+        "RIT": "RIT",
+        "CHECKLIST": "CHECKLIST",
+        "DEGRADACAO REDE": "DEGRADACAO REDE",
+        "LANCAMENTO SD": "LANLAMENTO SD",
+        "MATERIAL INDEVIDO": "MATERIAL INDEVIDO",
+        "CLEAN-UP": "CLEAN-UP"
+    };
+    const atividade = aliases[normalizarTexto(indicador.nome)];
+    if (!atividade) return 0;
+
+    const linhaAtividade = linhas.find(linha =>
+        normalizarTexto(linha[6]) === atividade
+    );
+    return Number(linhaAtividade?.[7]) || 0;
+}
+
+function obterMeta(indicador, mesSelecionado, dataSelecionada) {
+    const diasUteis = obterDiasUteisAcumulados(
+        mesSelecionado,
+        dataSelecionada
+    );
+
+    if (normalizarTexto(indicador.nome) === "FALHA DE M.O") {
+        const calendario = workbookGlobal.Sheets["CALENDÁRIO"];
+        const percentualFalha = Number(calendario?.["I2"]?.v || 14.5);
+        return Math.round((4 * diasUteis) * percentualFalha / 100);
     }
 
-    return Number(calendario[indicador.celulaMeta]?.v || 0);
+    return obterMetaDia(indicador) * diasUteis;
 }
 
 function contarRegistros(dados, gestor, mesSelecionado, dataSelecionada) {
@@ -637,7 +695,7 @@ function atualizarPainel() {
             return;
         }
 
-        const meta = obterMeta(indicador);
+        const meta = obterMeta(indicador, mesSelecionado, dataSelecionada);
         const totalCard = dadosPermitidos.filter(
             linha => mesSelecionado === 0 || obterMesLinha(linha) === mesSelecionado
         ).length;
