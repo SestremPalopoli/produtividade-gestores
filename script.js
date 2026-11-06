@@ -279,7 +279,7 @@ function abrirPainelGestor() {
 }
 
 async function carregarArquivoExcel() {
-    const resposta = await fetch("dados.xlsx", { cache: "no-store" });
+    const resposta = await fetch("/static/dados.xlsx", { cache: "no-store" });
 
     if (!resposta.ok) {
         throw new Error(`Não foi possível carregar dados.xlsx. Código ${resposta.status}.`);
